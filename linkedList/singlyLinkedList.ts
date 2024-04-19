@@ -3,7 +3,7 @@ type LinkNode<T> = {
   next: LinkNode<T> | null;
 };
 
-class SinglyLinkedList<T = never> {
+export class SinglyLinkedList<T = never> {
   private head_: LinkNode<T> | null = null;
 
   constructor(...value: T[]) {
@@ -19,12 +19,23 @@ class SinglyLinkedList<T = never> {
         if (current) {
           const value = current;
           current = current.next;
-          return { value: value, done: false };
+          return { value, done: false };
         } else {
           return { done: true };
         }
       },
     };
+  }
+
+  length() {
+    let count = 0;
+    let current = this.head_;
+    while (current) {
+      count++;
+      current = current.next;
+    }
+
+    return count;
   }
 
   isEmpty() {
@@ -39,30 +50,38 @@ class SinglyLinkedList<T = never> {
   pushBack(value: T) {
     let current = this.head_;
     const newNode = { value, next: null };
-    if (current == null) {
-      // 아 여기 타입 가드 된다면 참 좋을텐데
+    if (this.isEmpty()) {
       this.head_ = newNode;
       return;
     }
-    while (current.next) {
-      current = current.next;
+    while (current!.next) {
+      current = current!.next;
     }
-    current.next = newNode;
+    current!.next = newNode;
   }
 
   popFront() {
-    if (this.head_ == null) return;
-    this.head_ = this.head_.next;
+    if (this.isEmpty()) return;
+    if (this.length() === 1) {
+      this.head_ = null;
+      return;
+    }
+    this.head_ = this.head_!.next;
   }
 
   popBack() {
-    if (this.head_ == null || this.head_.next == null) return;
+    if (this.isEmpty()) return;
+    if (this.length() === 1) {
+      this.head_ = null;
+      return;
+    }
     let previous: LinkNode<T> | null = null;
     let current: LinkNode<T> | null = this.head_;
-    while (current) {
+    while (current?.next) {
       previous = current;
       current = current.next;
     }
+
     previous!.next = null;
   }
 
@@ -81,8 +100,8 @@ class SinglyLinkedList<T = never> {
     }
   }
 
-  remove(n?: LinkNode<T> | null) {
-    if (this.head_ == null || !n) return;
+  remove(n: LinkNode<T>) {
+    if (this.isEmpty() || !n) return;
     let current: LinkNode<T> | null = this.head_;
     while (current) {
       if (current.next === n) {
@@ -91,6 +110,10 @@ class SinglyLinkedList<T = never> {
       }
       current = current.next;
     }
+  }
+
+  clear() {
+    this.head_ = null;
   }
 
   head() {
@@ -126,6 +149,10 @@ class SinglyLinkedList<T = never> {
     return buffer.length === 0 ? null : buffer;
   }
 
+  toArray(verbose = false) {
+    return (verbose ? [...this] : [...this].map((node) => node!.value)) as T[];
+  }
+
   print() {
     let current = this.head_;
     const buffer = [];
@@ -136,42 +163,3 @@ class SinglyLinkedList<T = never> {
     console.log(...buffer);
   }
 }
-
-// test
-
-const linkedList = new SinglyLinkedList<number>();
-
-for (let i = 5; i > 0; i--) {
-  linkedList.pushFront(i);
-  linkedList.print();
-}
-
-[6, 7, 8, 9, 10].forEach((n) => {
-  linkedList.pushBack(n);
-  linkedList.print();
-});
-
-const thirdNode = linkedList.find(3);
-
-if (thirdNode) linkedList.insertBack(thirdNode, 1000);
-linkedList.print();
-
-linkedList.remove(thirdNode);
-linkedList.print();
-
-linkedList.popFront();
-linkedList.popBack();
-linkedList.popBack();
-linkedList.popBack();
-linkedList.popFront();
-
-linkedList.print();
-
-// iteration protocol
-for (const value of linkedList) {
-  value;
-}
-console.log([...linkedList]);
-
-console.log(linkedList.head());
-console.log(linkedList.tail());
