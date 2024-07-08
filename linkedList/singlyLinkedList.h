@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 #include <string>
 
 template<typename T> class SinglyLinkedList {

@@ -24,6 +24,9 @@ export class SinglyLinkedList<T = never> {
           return { done: true };
         }
       },
+      [Symbol.iterator]() {
+        return this;
+      },
     };
   }
 
