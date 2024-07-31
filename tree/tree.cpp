@@ -1,4 +1,5 @@
 #include <iostream>
+#include <queue>
 
 template<typename T>
 class BinaryTree {
@@ -75,7 +76,21 @@ class BinaryTree {
       return 1 + std::max(Height(node->left), Height(node->right));
     }
 
-    void LevelOrder () {}
+    void LevelOrder () {
+      IterLevelOrder(root_);
+    }
+
+    void IterLevelOrder(Node* node) {
+      std::queue<Node*> q;
+      q.push(node);
+      while(!q.empty()) {
+        Node* f = q.front();
+        std::cout << ' ' << f->item << ' ';
+        if (f->left) q.push(f->left);
+        if (f->right) q.push(f->right);
+        q.pop();
+      }
+    };
 
   private:
     Node* root_ = nullptr;
@@ -96,6 +111,7 @@ int main () {
   binaryTree.PreOrder();
   binaryTree.InOrder();
   binaryTree.PostOrder();
+  binaryTree.LevelOrder();
 
   return 0;
 }
