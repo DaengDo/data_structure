@@ -177,12 +177,62 @@ class BinarySearchTree {
     return node;
   }
 
+  Node* MinKeyLeft(Node* node) {
+    if (node == nullptr) return node;
+    while (node->left != nullptr) {
+      node = node->left;
+    }
+    return node;
+  }
+
   void DeleteNode(K key) {
     // TODO key값 기반 node 삭제하기
-    // 1. 자식이 없는 경우
-    // 2. 자식이 하나인 경우
-    // 3. 자식이 둘인 경우
-    // 4. 위 3가지 경우로 나눠서 생각하기
+    // 해당 키의 노드를 찾기
+    // 노드를 찾으면 삭제 시작, 못찾으면 그대로 종료
+    // 1. 자식이 없는 경우 -> 그냥 삭제
+    // 2. 자식이 하나인 경우 -> 자식 포인터가 current의 부모를 가르키도록 수정
+    // 3. 자식이 둘인 경우 -> MinKeyLeft가 삭제할 노드의 자리로 오도록 수정
+    Node* current = root;
+    Node* parent = nullptr;
+    while (current != nullptr) {
+      if (current->item.key > key) {
+        current = current->left;
+        parent = current;
+      } else if (current->item.key < key) {
+        current = current->right;
+        parent = current;
+      } else {
+        break;
+      }
+    }
+    if (current == nullptr) return;  // 삭제할 대상 없음
+
+    // 자식이 없는 경우
+    if (current->left == nullptr && current->right == nullptr) {
+      // 터미널 노드 삭제 및 부모 포인터 초기화
+      if (parent == nullptr) {
+        root = nullptr;
+        delete current;
+      } else if (parent->item.key > key) {
+        parent->left = nullptr;
+        delete current;
+      } else {
+        parent->right = nullptr;
+        delete current;
+      }
+      // 자식이 둘 다 있는 경우
+    } else if (current->left != nullptr && current->right != nullptr) {
+      // current->right 의 MinKeyLeft를 호출해서 걔를 삭제할 노드 자리로 격상
+      Node* nodeToSwap = MinKeyLeft(current);
+      if (parent == nullptr) {
+        root = nodeToSwap;
+      } else if (parent->item.key > key) {
+        parent->left = nodeToSwap;
+      } else {
+        parent->right = nodeToSwap;
+      }
+      // MinKeyLeft의 부모 요소 포인터도 초기화 해야 하는데 어떻게 하지?
+    }
   }
 
  private:
