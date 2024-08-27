@@ -31,7 +31,7 @@ class BinarySearchTree {
   }
 
   void Visit(Node* node) {
-    std::cout << node->item.key << ' ' << node->item.value << std::endl;
+    std::cout << '(' << node->item.key << ", " << node->item.value << ") ";
   }
 
   /**
@@ -66,13 +66,6 @@ class BinarySearchTree {
     RecurPreOrder(node->right);
   }
 
-  /**
-   *            1
-   *       2         3
-   *    4    5     6    7
-   *
-   * in: 2 -> 4 -> 5 -> 1 -> 3 -> 6 -> 7
-   */
   void InOrder(OrderType type = OrderType::RECUR) {
     if (type == OrderType::ITER) {
       IterInOrder(root);
@@ -80,8 +73,15 @@ class BinarySearchTree {
       RecurInOrder(root);
     }
   }
+  /**
+   *            5
+   *       3         7
+   *    1    4     6    8
+   *
+   * in: 3 -> 1 -> 4 -> 5 -> 7 -> 6 -> 8
+   */
   void IterInOrder(Node* node) {
-    if (node != nullptr) return;
+    if (node == nullptr) return;
     std::stack<Node*> s;
     if (node->right != nullptr) s.push(node->right);
     s.push(node);
@@ -89,8 +89,9 @@ class BinarySearchTree {
 
     while (!s.empty()) {
       Node* current = s.top();
-      s.pop();
       Visit(current);
+      s.pop();
+      if (current == root) continue;
       if (current->right != nullptr) s.push(current->right);
       if (current->left != nullptr) s.push(current->left);
     }
@@ -116,8 +117,8 @@ class BinarySearchTree {
       RecurPostOrder(root);
     }
   }
-  void IterPostOrder() {
-    if (node != nullptr) return;
+  void IterPostOrder(Node* node) {
+    if (node == nullptr) return;
     std::stack<Node*> s;
     s.push(node);
     if (node->right != nullptr) s.push(node->right);
@@ -127,6 +128,7 @@ class BinarySearchTree {
       Node* current = s.top();
       s.pop();
       Visit(current);
+      if (current == root) continue;
       if (current->right != nullptr) s.push(current->right);
       if (current->left != nullptr) s.push(current->left);
     }
@@ -151,7 +153,6 @@ class BinarySearchTree {
   }
 
   void Insert(Item item, OrderType type = OrderType::RECUR) {
-    // TODO
     if (root == nullptr)
       root = new Node{item, nullptr, nullptr};
     else if (type == OrderType::RECUR)
@@ -160,25 +161,28 @@ class BinarySearchTree {
       root = IterInsert(root, item);
   }
   Node* RecurInsert(Node* node, Item item) {
-    // TODO
     if (node == nullptr) {
-    }
-    if (node->item.key == item.key) {
-      node->item.value = item.value;
-      return node;
-    }
-    if (node->item.key > item.key) {
+      node = new Node{item, nullptr, nullptr};
+    } else if (node->item.key > item.key) {
       node->left = RecurInsert(node->left, item);
-    } else {
+    } else if (node->item.key < item.key) {
       node->right = RecurInsert(node->right, item);
+    } else {
+      node->item.value = item.value;
     }
+    return node;
   }
   Node* IterInsert(Node* node, Item item) {
-    // TODO
+    // TODO 일단 나중에 해보자
+    return node;
   }
 
-  void DeleteNode() {
-    // TODO
+  void DeleteNode(K key) {
+    // TODO key값 기반 node 삭제하기
+    // 1. 자식이 없는 경우
+    // 2. 자식이 하나인 경우
+    // 3. 자식이 둘인 경우
+    // 4. 위 3가지 경우로 나눠서 생각하기
   }
 
  private:
@@ -192,9 +196,40 @@ class BinarySearchTree {
  */
 
 int main() {
-  // using Node = BinarySearchTree<char, int>::Node;
-  // using Item = BinarySearchTree<char, int>::Item;
-  // BinarySearchTree<char, int> bst;
+  // using Node = BinarySearchTree<int, char>::Node;
+  using Item = BinarySearchTree<int, char>::Item;
+  BinarySearchTree<int, char> bst;
+
+  /*           5
+   *      3         7
+   *   1    4    6     8
+   * Pre  : 5 3 1 4 7 6 8
+   * In   : 3 1 4 5 7 6 8
+   * Post : 3 1 4 7 6 8 5
+   * Level: 5 3 7 1 4 6 8
+   */
+
+  for (int i : {5, 3, 7, 1, 4, 6, 8}) {
+    bst.Insert(Item{i, char('A' + i)});
+  }
+
+  std::cout << "\n(Recur)pre order: \t";
+  bst.PreOrder(OrderType::RECUR);
+  std::cout << "\n(Iter)pre order: \t";
+  bst.PreOrder(OrderType::ITER);
+
+  std::cout << "\n\n(Recur)in order: \t";
+  bst.InOrder(OrderType::RECUR);
+  std::cout << "\n(Iter)in order: \t";
+  bst.InOrder(OrderType::ITER);
+
+  std::cout << "\n\n(Recur)post order: \t";
+  bst.PostOrder(OrderType::RECUR);
+  std::cout << "\n(Iter)post order: \t";
+  bst.PostOrder(OrderType::ITER);
+
+  std::cout << "\n\nlevel order:\t\t";
+  bst.LevelOrder();
 
   return 0;
 }
