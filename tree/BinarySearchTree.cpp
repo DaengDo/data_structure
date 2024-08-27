@@ -35,11 +35,11 @@ class BinarySearchTree {
   }
 
   /**
-   *            1
-   *       2         3
-   *    4    5     6    7
+   *            5
+   *       3         7
+   *    1    4     6    8
    *
-   * pre: 1 -> 2 -> 4 -> 5 -> 3 -> 6 -> 7
+   * pre: 5 -> 3 -> 1 -> 4 -> 7 -> 6 -> 8
    */
   void PreOrder(OrderType type = OrderType::RECUR) {
     if (type == OrderType::ITER) {
@@ -104,11 +104,11 @@ class BinarySearchTree {
   }
 
   /**
-   *            1
-   *       2         3
-   *    4    5     6    7
+   *            5
+   *       3         7
+   *    1    4     6    8
    *
-   * post: 2 -> 4 -> 5 -> 3 -> 6 -> 7 -> 1
+   * post: 3 -> 1 -> 4 -> 7 -> 6 -> 8 -> 5
    */
   void PostOrder(OrderType type = OrderType::RECUR) {
     if (type == OrderType::ITER) {
@@ -185,54 +185,39 @@ class BinarySearchTree {
     return node;
   }
 
-  void DeleteNode(K key) {
-    // TODO key값 기반 node 삭제하기
-    // 해당 키의 노드를 찾기
-    // 노드를 찾으면 삭제 시작, 못찾으면 그대로 종료
-    // 1. 자식이 없는 경우 -> 그냥 삭제
-    // 2. 자식이 하나인 경우 -> 자식 포인터가 current의 부모를 가르키도록 수정
-    // 3. 자식이 둘인 경우 -> MinKeyLeft가 삭제할 노드의 자리로 오도록 수정
-    Node* current = root;
-    Node* parent = nullptr;
-    while (current != nullptr) {
-      if (current->item.key > key) {
-        current = current->left;
-        parent = current;
-      } else if (current->item.key < key) {
-        current = current->right;
-        parent = current;
-      } else {
-        break;
-      }
-    }
-    if (current == nullptr) return;  // 삭제할 대상 없음
+  void Remove(const K& key) {
+    std::cout << "\nremove: " << key << std::endl;
+    root = Remove(root, key);
+  }
 
-    // 자식이 없는 경우
-    if (current->left == nullptr && current->right == nullptr) {
-      // 터미널 노드 삭제 및 부모 포인터 초기화
-      if (parent == nullptr) {
-        root = nullptr;
-        delete current;
-      } else if (parent->item.key > key) {
-        parent->left = nullptr;
-        delete current;
+  Node* Remove(Node* node, const K& key) {
+    if (node == nullptr) {
+      return node;
+    } else if (node->item.key > key) {
+      node->left = Remove(node->left, key);
+    } else if (node->item.key < key) {
+      node->right = Remove(node->left, key);
+    } else {
+      // 삭제할 노드 찾음
+      if (node->left == nullptr) {
+        // 1) left가 없을 때는 right 포인터를 전달
+        Node* temp = node->right;
+        delete node;
+        return temp;
+      } else if (node->right == nullptr) {
+        // 2) right가 없을 때는 left 포인터를 전달
+        Node* temp = node->left;
+        delete node;
+        return temp;
       } else {
-        parent->right = nullptr;
-        delete current;
+        // 3) 자식이 둘이면 오른쪽 서브 트리의 가장 작은 값을 현재 위치로 격상
+        Node* temp = MinKeyLeft(node->right);
+        node->item = temp->item;
+        // 오른쪽 서브 트리의 가장 작은 값`MinKeyLeft()`을 트리에서 제거
+        node->right = Remove(node->right, temp->item.key);
       }
-      // 자식이 둘 다 있는 경우
-    } else if (current->left != nullptr && current->right != nullptr) {
-      // current->right 의 MinKeyLeft를 호출해서 걔를 삭제할 노드 자리로 격상
-      Node* nodeToSwap = MinKeyLeft(current);
-      if (parent == nullptr) {
-        root = nodeToSwap;
-      } else if (parent->item.key > key) {
-        parent->left = nodeToSwap;
-      } else {
-        parent->right = nodeToSwap;
-      }
-      // MinKeyLeft의 부모 요소 포인터도 초기화 해야 하는데 어떻게 하지?
     }
+    return node;
   }
 
  private:
@@ -246,7 +231,6 @@ class BinarySearchTree {
  */
 
 int main() {
-  // using Node = BinarySearchTree<int, char>::Node;
   using Item = BinarySearchTree<int, char>::Item;
   BinarySearchTree<int, char> bst;
 
@@ -277,6 +261,11 @@ int main() {
   bst.PostOrder(OrderType::RECUR);
   std::cout << "\n(Iter)post order: \t";
   bst.PostOrder(OrderType::ITER);
+
+  std::cout << "\n\nlevel order:\t\t";
+  bst.LevelOrder();
+
+  bst.Remove(5);
 
   std::cout << "\n\nlevel order:\t\t";
   bst.LevelOrder();
