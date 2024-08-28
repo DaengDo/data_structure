@@ -158,7 +158,7 @@ class BinarySearchTree {
     else if (type == OrderType::RECUR)
       root = RecurInsert(root, item);
     else
-      root = IterInsert(root, item);
+      IterInsert(root, item);
   }
   Node* RecurInsert(Node* node, Item item) {
     if (node == nullptr) {
@@ -172,9 +172,33 @@ class BinarySearchTree {
     }
     return node;
   }
-  Node* IterInsert(Node* node, Item item) {
-    // TODO 일단 나중에 해보자
-    return node;
+  void IterInsert(Node* node, Item item) {
+    Node* parent = nullptr;
+
+    // 삽입하기 위한 자리 반복문으로 찾기
+    while (node != nullptr && node->item.key != item.key) {
+      if (node->item.key > item.key) {
+        parent = node;
+        node = node->left;
+      } else {
+        parent = node;
+        node = node->right;
+      }
+    }
+
+    // 삽입할 키가 이미 있는 경우
+    if (node != nullptr) {
+      node->item.value = item.value;
+      return;
+    }
+
+    if (parent == nullptr) {
+      root = new Node{item, nullptr, nullptr};
+    } else if (parent->item.key > item.key) {
+      parent->left = new Node{item, nullptr, nullptr};
+    } else {
+      parent->right = new Node{item, nullptr, nullptr};
+    }
   }
 
   Node* MinKeyLeft(Node* node) {
@@ -244,7 +268,7 @@ int main() {
    */
 
   for (int i : {5, 3, 7, 1, 4, 6, 8}) {
-    bst.Insert(Item{i, char('A' + i)});
+    bst.Insert(Item{i, char('A' + i)}, OrderType::ITER);
   }
 
   std::cout << "\n(Recur)pre order: \t";
