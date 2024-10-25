@@ -1,112 +1,130 @@
-#include <iostream>
-#include <cassert>
-#include <iomanip>
 #include <cstring>
+#include <iostream>
 
-template<typename T>
-class MinHeap {
-  protected:
-    T* heap_ = nullptr;
-    int capacity_ = 0;
-    int size_ = 0;
+template <typename T>
+class MaxHeap {
+ private:
+  T* heap_ = nullptr;
+  int size_ = 0;
+  int capacity_ = 0;
 
-  public:
-    MinHeap (int cap = 10) {
-      capacity_ = cap;
-      size_ = 0;
-      T* new_heap = new T[capacity_ + 1];
-      heap_ = new_heap;
-    }
-    ~MinHeap () {
-      if (heap_) delete [] heap_;
-    }
+ public:
+  explicit MaxHeap(int capacity = 4) { resize(capacity); }
 
-    bool IsFull () {
-      return size_ == capacity_;
-    }
-
-    bool IsEmpty () {
-      return size_ == 0;
-    }
-
-    void Resize (int new_capacity) {
-      T* new_heap = new T[new_capacity];
-      std::memcpy(new_heap, heap_, sizeof(T) * (capacity_ + 1));
+  ~MaxHeap() {
+    if (heap_ != nullptr) {
       delete[] heap_;
-      heap_ = new_heap;
-      capacity_ = new_capacity;
+    }
+  }
+
+  auto is_empty() -> bool { return size_ == 0; }
+
+  auto is_full() -> bool { return capacity_ == size_ + 1; }
+
+  auto top() -> T {
+    if (is_empty()) {
+      std::cout << "heap is empty!\n";
+      return T();
+    }
+    return heap_(1);
+  }
+
+  void resize(int capacity) {
+    capacity_ = capacity;
+    T* temp = new T[capacity_];
+    if (heap_ == nullptr) {
+      heap_ = temp;
+    } else {
+      std::memcpy(temp, heap_, sizeof(T) * (size_ + 1));
+      delete[] heap_;
+      heap_ = temp;
+    }
+  }
+
+  void push(T element) {
+    if (is_full()) {
+      resize(capacity_ * 2);
     }
 
-    void Push (T val) {
-      if (IsFull()) Resize(capacity_ * 2);
-      size_ += 1;
-      heap_[size_] = val;
+    // 마지막 노드에 추가하고 부모랑 비교하면서 스왑
+    size_ += 1;
+    int current = size_;
 
-      // 정렬
-      int parent_index = size_ / 2;
-      int child_index = size_;
-      bool isRoot = parent_index == 0;
-      while (!isRoot && heap_[parent_index] > val) {
-        // 부모 자식 노드 변경
-        heap_[child_index] = heap_[parent_index];
-        heap_[parent_index] = val;
-        child_index = parent_index;
-        parent_index = parent_index / 2;
+    // (현재 노드가) 부모보다 큰 값일 경우 스왑
+    while (current != 1 && element > heap_[current / 2]) {
+      heap_[current] = heap_[current / 2];
+      current = current / 2;
+    }
+
+    heap_[current] = element;
+  }
+
+  void pop() {
+    // 마지막 노드를 루트로 -> 부모가 자식보다 값이 작을 경우 스왑
+    T last_element = heap_[size_];
+    size_ -= 1;
+
+    int current = 1;
+
+    while (true) {
+      int child = current * 2;
+
+      // 자식 노드가 없을 경우 break;
+      if (child > size_) {
+        heap_[current] = last_element;
+        break;
       }
-    }
 
-    void Pop () {
-      // 루트 요소 반환하기
-      assert(!IsEmpty());
-      // if (IsEmpty()) return nullptr;
-
-      int current_idx = 1;
-      heap_[current_idx] = heap_[size_];
-      size_ -= 1;
-      while (current_idx * 2 <= size_) {
-        // 왼쪽 값이 사이즈를 넘어서는 경우
-        if (current_idx * 2 + 1 > size_) {
-          if (heap_[current_idx * 2] < heap_[current_idx]) {
-            T temp = heap_[current_idx];
-            heap_[current_idx]  = heap_[current_idx * 2];
-            heap_[current_idx * 2] = temp;
-          }
-          break;
-        }
-
-        // 오른쪽 왼쪽 비교해서 더 작은값과 교환
-        int exchange_idx = heap_[current_idx * 2] < heap_[current_idx * 2 + 1] ? current_idx * 2 : current_idx * 2 + 1;
-
-        T temp = heap_[current_idx];
-        heap_[current_idx] = heap_[exchange_idx];
-        heap_[exchange_idx] = temp;
-
-        current_idx = exchange_idx;
+      int larger_child = child;
+      bool has_right_child = size_ >= child + 1;
+      // 더 큰 자식 노드 추출
+      if (has_right_child && heap_[child] < heap_[child + 1]) {
+        larger_child = child + 1;
       }
+
+      // 부모가 더 커서 바꿀 필요 없는 경우
+      if (heap_[larger_child] <= last_element) {
+        heap_[current] = last_element;
+        break;
+      }
+
+      // 자식이 더 큰 경우 부모와 스왑
+      heap_[current] = heap_[larger_child];
+      current = larger_child;
+    }
+  }
+
+  void print() {
+    if (is_empty()) {
+      std::cout << "heap is empty!\n";
+      return;
     }
 
-    T Top () {
-      return heap_[1];
+    std::cout << "heap size: " << size_ << "\t->\t";
+
+    for (int i = 1; i <= size_; i++) {
+      std::cout << heap_[i] << "  ";
     }
+
+    std::cout << '\n';
+  }
 };
 
-int main () {
-  // 최소 힙 활용
-  MinHeap<int> heap;
+// NOLINTNEXTLINE(modernize-use-trailing-return-type)
+int main() {
+  MaxHeap<int> max_heap(5);
+  max_heap.print();
 
-  int inputLength;
-  std::cin >> inputLength;
+  max_heap.push(3);
+  max_heap.print();
 
-  for (int i = 0; i < inputLength; i++) {
-    int temp;
-    std::cin >> temp;
-    heap.Push(temp);
+  for (auto element : {1, 2, 3, 4, 5, 6, 7, 8, 9}) {
+    max_heap.push(element);
+    max_heap.print();
   }
 
-  for (int i = 0; i < inputLength; i++) {
-    std::cout << heap.Top() << "\n";
-    heap.Pop();
+  for (int i = 0; i < 9; i++) {
+    max_heap.pop();
+    max_heap.print();
   }
-
-  return 0;
 }
