@@ -16,18 +16,18 @@ int main() {
     bst.Print2D();
   }
 
-  // bst.InOrder();  // key에 대해 정렬
+  bst.RecurInOrder();
 
-  // cout << bst.RecurGet(5)->value << endl;
-  // cout << bst.RecurGet(3)->value << endl;
-  // cout << bst.RecurGet(7)->value << endl;
-  // cout << bst.RecurGet(1)->value << endl;
-  // cout << bst.RecurGet(4)->value << endl;
+  cout << bst.RecurGet(5)->value << endl;
+  cout << bst.RecurGet(3)->value << endl;
+  cout << bst.RecurGet(7)->value << endl;
+  cout << bst.RecurGet(1)->value << endl;
+  cout << bst.RecurGet(4)->value << endl;
 
-  // for (int i : {5, 4, 7, 8, 9}) {
-  //   bst.Remove(i);
-  //   bst.Print2D();
-  // }
+  for (int i : {5, 4, 7, 8, 9}) {
+    bst.Remove(i);
+    bst.Print2D();
+  }
 
   return 0;
 }

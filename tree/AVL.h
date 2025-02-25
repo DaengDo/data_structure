@@ -8,9 +8,6 @@ class AVL : public BinarySearchTree<K, V> {
   using Base = Tree<K, V>;
   using Item = Item<K, V>;
   using Node = Node<K, V>;
-  // using Base = BinarySearchTree<K, V>;
-  // using Item = BinarySearchTree<K, V>::Item;
-  // using Node = BinarySearchTree<K, V>::Node;
 
  public:
   int Balance(Node* node) {
@@ -24,16 +21,19 @@ class AVL : public BinarySearchTree<K, V> {
   # before
     3
       2
-        1
+    a   1
+          b
 
   # after
       2
     3   1
+      a   b
   */
   Node* RotateLeft(Node* parent) {
-    // TODO:
-
-    return nullptr;
+    Node* child = parent->right;  // 2
+    parent->right = child->left;  // a를 3의 자식으로
+    child->left = parent;         // 2의 왼쪽을 3으로
+    return child;
   }
 
   /*
@@ -47,12 +47,13 @@ class AVL : public BinarySearchTree<K, V> {
     1   3
   */
   Node* RotateRight(Node* parent) {
-    // TODO:
-
-    return nullptr;
+    Node* child = parent->left;
+    parent->left = child->right;
+    child->right = parent;
+    return child;
   }
 
-  void Insert(const Item& item) { root_ = Insert(root_, item); }
+  void Insert(const Item& item) { this->root_ = Insert(this->root_, item); }
 
   Node* Insert(Node* node, const Item& item) {
     if (!node) return new Node{item, nullptr, nullptr};
@@ -73,24 +74,26 @@ class AVL : public BinarySearchTree<K, V> {
     // balance가 0, 1, -1 이면 조절할 필요가 없다고 판단
 
     // LL -> Right Rotation
-    // if (balance > 1 && Balance(node->left) >= 0)
-    //	TODO:
+    if (balance > 1 && Balance(node->left) >= 0) {
+      return RotateRight(node);
+    }
 
     // RR -> Left Rotation
-    // if (balance < -1 && Balance(node->right) <= 0)
-    //	TODO:
+    if (balance < -1 && Balance(node->right) <= 0) {
+      return RotateLeft(node);
+    }
 
     // LR -> Left-Right Rotation
-    // if (balance > 1 && Balance(node->left) < 0)
-    //{
-    //	TODO:
-    //}
+    if (balance > 1 && Balance(node->left) < 0) {
+      node->left = RotateLeft(node->left);
+      return RotateRight(node);
+    }
 
     // RL -> Right-Left Rotation
-    // if (balance < -1 && Balance(node->right) > 0)
-    //{
-    //	TODO:
-    //}
+    if (balance < -1 && Balance(node->right) > 0) {
+      node->right = RotateLeft(node->right);
+      return RotateRight(node);
+    }
 
     return node;
   }
@@ -104,7 +107,7 @@ class AVL : public BinarySearchTree<K, V> {
   void Remove(const K& key) {
     using namespace std;
     cout << "Remove " << key << endl;
-    root_ = Remove(root_, key);
+    this->root_ = Remove(this->root_, key);
   }
 
   Node* Remove(Node* node, const K& key) {
@@ -137,12 +140,28 @@ class AVL : public BinarySearchTree<K, V> {
 
     int balance = Balance(node);
 
-    // TODO:
+    // LL -> Right Rotation
+    if (balance > 1 && Balance(node->left) >= 0) {
+      return RotateRight(node);
+    }
+
+    // RR -> Left Rotation
+    if (balance < -1 && Balance(node->right) <= 0) {
+      return RotateLeft(node);
+    }
+
+    // LR -> Left-Right Rotation
+    if (balance > 1 && Balance(node->left) < 0) {
+      node->left = RotateLeft(node->left);
+      return RotateRight(node);
+    }
+
+    // RL -> Right-Left Rotation
+    if (balance < -1 && Balance(node->right) > 0) {
+      node->right = RotateLeft(node->right);
+      return RotateRight(node);
+    }
 
     return node;
   }
-
- private:
-  Node*& root_ = BinarySearchTree<K, V>::root_;
-  // this->root_로도 사용 가능
 };
