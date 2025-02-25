@@ -19,17 +19,10 @@ class HashTable {
   ~HashTable() { delete[] table_; }
 
   void Insert(const Item& item) {
-    size_t index = HashFunc(item.key);  // 키를 인덱스로 사용
-    // TODO: 개방 주소법으로 해시 충돌 해결하기
-    // 만약 item의 value가 0이 아니라면 해시 충돌이 일어난 것으로 간주
-    bool hasCollision = table_[index].value != 0;
-    if (hasCollision) {
-      while (true) {
-        // index로 선형 조사 -> 빈 칸 찾으면 넣기, 빈 칸 없으면 메모리 늘리기
-      }
-    } else {
-      table_[index] = item;
-    }
+    size_t index = HashFunc(item.key);
+
+    while (table_[index].key != K()) index++;
+    table_[index] = item;
   }
 
   V Get(const K& key) {
@@ -43,10 +36,14 @@ class HashTable {
 
   // 문자열을 정수 인덱스(해쉬값)로 변환
   // Horner's method
-  // size_t HashFunc(const string& s)
-  //{
-  //  return TODO:
-  //}
+  size_t HashFunc(const string& s) {
+    int solt = 17;
+    size_t index = 0;
+    for (int i = 0; i < capacity_; i++) {
+      index = solt * index + int(s.at(i));
+    }
+    return index % capacity_;
+  }
 
   void Print() {
     for (int i = 0; i < capacity_; i++)
@@ -60,12 +57,6 @@ class HashTable {
 };
 
 int main() {
-  // 충돌
-  // - 개방 주소법: 선형 조사법
-  // - 체이닝: 멤버 변수 Item* table_ 대신에 LinkedList<Item>* table_사용
-
-  // 키: int, 값: int 인 경우
-  // 키의 범위가 아주 크고 아이템의 개수는 적을 경우
   {
     using Item = HashTable<int, int>::Item;
 
